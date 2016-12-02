@@ -1,3 +1,14 @@
+'''
+**********************************************************************
+* Filename      : SunFounder_Easy_SQLite
+* Description   : Very simple sqlite module
+* Author        : Cavon
+* E-mail        : service@sunfounder.com
+* Website       : www.sunfounder.com
+* Update        : Cavon    2016-12-02     V1.0.0
+*               : Cavon    2016-12-02     V1.0.1
+**********************************************************************
+'''
 import sqlite3
 
 class DB(object):
@@ -67,7 +78,7 @@ class DB(object):
             value_count = db.execute(cmd)
             result = True
         except:
-            result = 0
+            result = False
         finally:
             db.close()
             return result
