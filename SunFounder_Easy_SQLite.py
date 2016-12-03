@@ -5,8 +5,7 @@
 * Author        : Cavon
 * E-mail        : service@sunfounder.com
 * Website       : www.sunfounder.com
-* Update        : Cavon    2016-12-02     V1.0.0
-*               : Cavon    2016-12-02     V1.0.1
+* Update        : Cavon    2016-12-02     V1.0.1
 **********************************************************************
 '''
 import sqlite3
@@ -17,7 +16,7 @@ class DB(object):
         self.db_name = db_name
         self.table_name = table_name
         if not self.is_table_exist():
-            self.creat_table()
+            self.create_table()
 
     def get(self, name, default=None):
         db = sqlite3.connect(self.db_name)
@@ -55,21 +54,39 @@ class DB(object):
         db.commit()
         db.close()
 
-    def sumary(self):
+    def remove(self, name):
+        db = sqlite3.connect(self.db_name)
+        if self.is_name_exist(name):
+            print 'value exist'
+            cmd = 'DELETE from %s WHERE name="%s"' % (self.table_name, name)
+            print cmd, 
+            db.execute(cmd)
+            print 'done'
+            result = True
+        else:
+            result = False
+        db.commit()
+        db.close()
+        return result
+
+    def delete(self, name):
+        self.remove(name)
+
+    def get_all(self):
+        dic = {}
         db = sqlite3.connect(self.db_name)
         try:
             cmd = 'SELECT * FROM %s' % (self.table_name)
             value_count = db.execute(cmd)
             value_count = value_count.fetchall()
             for row in value_count:
-                print "name:  ", row[0]
-                print "Value: ", row[1]
-            print 'total:', len(value_count)
+                dic[row[0]] = int(row[1])
         except Exception, e:
             print e
-            self.value_count = 0
         finally:
             db.close()
+
+        return dic
 
     def is_table_exist(self):
         db = sqlite3.connect(self.db_name)
@@ -83,7 +100,7 @@ class DB(object):
             db.close()
             return result
 
-    def creat_table(self):
+    def create_table(self):
         db = sqlite3.connect(self.db_name)
         try:
             print "Creating a Table...",
