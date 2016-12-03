@@ -5,32 +5,53 @@
 * Author        : Cavon
 * E-mail        : service@sunfounder.com
 * Website       : www.sunfounder.com
-* Update        : Cavon    2016-12-02     V1.0.1
+* Update        : Cavon    2016-12-02     V1.1.1
 **********************************************************************
 '''
 import sqlite3
+import logging
 
 class DB(object):
 
-    def __init__(self, db_name, table_name='default_table'):
+    LEVELS = {'debug': logging.DEBUG,
+              'info': logging.INFO,
+              'warning': logging.WARNING,
+              'error': logging.ERROR,
+              'critical': logging.CRITICAL
+              }
+
+    def __init__(self, db_name, table_name='default_table', debug='critical'):
         self.db_name = db_name
         self.table_name = table_name
+        self.logger_setup(debug)
         if not self.is_table_exist():
             self.create_table()
+
+    def logger_setup(self, debug):
+        self.logger = logging.getLogger("DB")
+        self.logger.setLevel(self.LEVELS[debug])
+        self.ch = logging.StreamHandler()
+        self.ch.setLevel(logging.DEBUG)
+        self.formatter = logging.Formatter("%(asctime)s  %(name)s  %(levelname)s  %(message)s")
+        self.ch.setFormatter(self.formatter)
+        self.logger.addHandler(self.ch)
+        self.debug = self.logger.debug
+        self.info  = self.logger.info
 
     def get(self, name, default=None):
         db = sqlite3.connect(self.db_name)
         try:
+            self.info('Get value')
             cmd = 'SELECT * FROM %s WHERE name="%s"' % (self.table_name, name)
-            print cmd, 
+            self.debug(cmd)
             value = db.execute(cmd)
             value = value.fetchall()
             #print "Value", value
             value = value[0][1]
-            print 'done'
+            self.info(' --Done')
         except Exception, e:
-            print e
-            print 'error, use default value'
+            self.debug(e)
+            self.info('read error, use default value')
             value = default
         finally:
             db.close()
@@ -40,28 +61,28 @@ class DB(object):
     def set(self, name, value):
         db = sqlite3.connect(self.db_name)
         if self.is_name_exist(name):
-            print 'value exist'
+            self.info('Value exist, set value')
             cmd = 'UPDATE %s SET value = %s WHERE name="%s"' % (self.table_name, value, name)
-            print cmd, 
+            self.debug(cmd)
             db.execute(cmd)
-            print 'done'
+            self.info('done')
         else:
-            print "INSERT value...",
+            self.info("Value not exist, new value")
             cmd = 'INSERT INTO %s(name, value) VALUES ("%s", %d)' % (self.table_name, name, value)
-            print cmd, 
+            self.debug(cmd)
             db.execute(cmd)
-            print 'done'
+            self.info(' --Done')
         db.commit()
         db.close()
 
     def remove(self, name):
         db = sqlite3.connect(self.db_name)
         if self.is_name_exist(name):
-            print 'value exist'
+            self.info('Value exist, removing')
             cmd = 'DELETE from %s WHERE name="%s"' % (self.table_name, name)
-            print cmd, 
+            self.debug(cmd)
             db.execute(cmd)
-            print 'done'
+            self.info(' --Done')
             result = True
         else:
             result = False
@@ -82,7 +103,7 @@ class DB(object):
             for row in value_count:
                 dic[row[0]] = int(row[1])
         except Exception, e:
-            print e
+            self.debug(e)
         finally:
             db.close()
 
@@ -103,13 +124,13 @@ class DB(object):
     def create_table(self):
         db = sqlite3.connect(self.db_name)
         try:
-            print "Creating a Table...",
+            self.info("Creating a Table...")
             cmd = 'create table %s (name varchar(20), value int)' % (self.table_name)
+            self.debug(cmd)
             db.execute(cmd)
-            print "done";
+            self.info(" --Done")
         except:
-            print "skiped"
-            print "Skip, %s table is already exist." % self.table_name
+            self.info("Skip, %s table is already exist." % self.table_name)
         finally:
             db.close()
 
