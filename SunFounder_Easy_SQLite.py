@@ -68,7 +68,7 @@ class DB(object):
             self.info('done')
         else:
             self.info("Value not exist, new value")
-            cmd = 'INSERT INTO %s(name, value) VALUES ("%s", %s)' % (self.table_name, name, value)
+            cmd = 'INSERT INTO %s(name, value) VALUES ("%s", "%s")' % (self.table_name, name, value)
             self.debug(cmd)
             db.execute(cmd)
             self.info(' --Done')
