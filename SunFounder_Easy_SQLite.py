@@ -62,7 +62,7 @@ class DB(object):
         db = sqlite3.connect(self.db_name)
         if self.is_name_exist(name):
             self.info('Value exist, set value')
-            cmd = 'UPDATE %s SET value = %s WHERE name="%s"' % (self.table_name, value, name)
+            cmd = 'UPDATE %s SET value = "%s" WHERE name="%s"' % (self.table_name, value, name)
             self.debug(cmd)
             db.execute(cmd)
             self.info('done')
